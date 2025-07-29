@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: method-test-mapping
-          path: method_test_mapping.json
+          path: app/target/method_test_mapping.json
