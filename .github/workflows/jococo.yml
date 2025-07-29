@@ -1,4 +1,4 @@
-name: JaCoCo Coverage and Method-Test Mappings
+name: JaCoCo Coverage and Method-Test Mapping
 
 on:
   push:
@@ -8,8 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -23,16 +25,20 @@ jobs:
       - name: Run Tests with Agent
         run: |
           AGENT_JAR=$(find agent/target -name 'agent-1.0-SNAPSHOT.jar' | head -n 1)
+          echo "Using agent: $AGENT_JAR"
           MAVEN_OPTS="-javaagent:$AGENT_JAR" mvn test -pl app
+
+      - name: Generate JaCoCo Report
+        run: mvn verify -pl app
+
+      - name: List coverage files
+        run: ls -R app/target/site/jacoco || echo "No coverage report found"
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: app/target/site/jacoco
-
-      - name: Debug - List app/target
-        run: ls -l app/target
 
       - name: Upload Method-Test Mapping
         uses: actions/upload-artifact@v4
