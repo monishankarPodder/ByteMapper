@@ -11,6 +11,25 @@ public class TrackerAdvice {
     private static final ConcurrentHashMap<String, String> methodToTest = new ConcurrentHashMap<>();
     private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
 
+    static {
+        // Write mapping when JVM exits
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try (FileWriter fw = new FileWriter("app/target/method_test_mapping.json")) {
+                fw.write("{\n");
+                int i = 0;
+                for (Map.Entry<String, String> entry : methodToTest.entrySet()) {
+                    fw.write("  \"" + entry.getKey() + "\": \"" + entry.getValue() + "\"");
+                    if (++i < methodToTest.size()) fw.write(",");
+                    fw.write("\n");
+                }
+                fw.write("}\n");
+                System.out.println("✅ method_test_mapping.json written successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+    }
+
     @Advice.OnMethodEnter
     public static void captureTest(@Advice.Origin("#t#.#m") String methodName) {
         if (methodName.contains("Test")) {
@@ -20,22 +39,6 @@ public class TrackerAdvice {
             if (test != null) {
                 methodToTest.putIfAbsent(methodName, test);
             }
-        }
-    }
-
-    @Advice.OnMethodExit(onThrowable = Throwable.class)
-    public static void onExit() {
-        try (FileWriter fw = new FileWriter("app/target/method_test_mapping.json")) {
-            fw.write("{\n");
-            int i = 0;
-            for (Map.Entry<String, String> entry : methodToTest.entrySet()) {
-                fw.write("  \"" + entry.getKey() + "\": \"" + entry.getValue() + "\"");
-                if (++i < methodToTest.size()) fw.write(",");
-                fw.write("\n");
-            }
-            fw.write("}\n");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
