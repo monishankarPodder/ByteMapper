@@ -10,6 +10,10 @@ import net.bytebuddy.asm.Advice;
 public class TrackerAdvice {
     private static final ConcurrentHashMap<String, String> methodToTest = new ConcurrentHashMap<>();
     private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
+    public static Map<String, String> getMethodToTest() {
+    return methodToTest;
+}
+
 
     static {
         // Save the mapping when the JVM shuts down
