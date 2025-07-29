@@ -8,6 +8,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
 
 public class AgentMain {
     public static void premain(String agentArgs, Instrumentation inst) {
@@ -18,17 +19,19 @@ public class AgentMain {
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder,
                                                     TypeDescription typeDescription,
                                                     ClassLoader classLoader,
-                                                    JavaModule module) {
+                                                    JavaModule module,
+                                                    ProtectionDomain domain) {
                 return builder.visit(
                     Advice.to(TrackerAdvice.class)
-                          .on(ElementMatchers.nameStartsWith("com.example")  // Change as needed
-                              .and(ElementMatchers.isMethod()))
+                          .on(ElementMatchers.isMethod()
+                                .and(ElementMatchers.not(ElementMatchers.nameStartsWith("java")))
+                                .and(ElementMatchers.not(ElementMatchers.isConstructor())))
                 );
             }
         };
 
         new AgentBuilder.Default()
-            .type(ElementMatchers.nameStartsWith("com.example")) // package prefix for your app
+            .type(ElementMatchers.nameStartsWith("com.example")) // your package prefix
             .transform(transformer)
             .installOn(inst);
     }
