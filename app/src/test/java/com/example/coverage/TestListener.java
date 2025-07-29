@@ -4,6 +4,7 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
 public class TestListener extends TestWatcher {
+
     @Override
     protected void starting(Description description) {
         MethodCallTracker.setCurrentTest(description.getMethodName());
@@ -11,7 +12,6 @@ public class TestListener extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
-        MethodCallTracker.setCurrentTest(null);
-        MethodCallTracker.writeToFile();
+        // Optional: log or clean up
     }
 }
