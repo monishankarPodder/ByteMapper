@@ -22,7 +22,8 @@ jobs:
 
       - name: Run Tests with Agent
         run: |
-          mvn test -pl app
+          AGENT_JAR=$(find agent/target -name '*agent*.jar' | head -n 1)
+          MAVEN_OPTS="-javaagent:$AGENT_JAR" mvn test -pl app
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
