@@ -12,7 +12,7 @@ public class TrackerAdvice {
     private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
 
     static {
-        // Write mapping when JVM exits
+        // Save the mapping when the JVM shuts down
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (FileWriter fw = new FileWriter("app/target/method_test_mapping.json")) {
                 fw.write("{\n");
@@ -23,7 +23,7 @@ public class TrackerAdvice {
                     fw.write("\n");
                 }
                 fw.write("}\n");
-                System.out.println("✅ method_test_mapping.json written successfully.");
+                System.out.println("✅ method_test_mapping.json written to app/target/");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -31,7 +31,7 @@ public class TrackerAdvice {
     }
 
     @Advice.OnMethodEnter
-    public static void captureTest(@Advice.Origin("#t#.#m") String methodName) {
+    public static void onMethodEnter(@Advice.Origin("#t#.#m") String methodName) {
         if (methodName.contains("Test")) {
             currentTest.set(methodName);
         } else {
