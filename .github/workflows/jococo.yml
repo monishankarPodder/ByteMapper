@@ -1,0 +1,37 @@
+name: JaCoCo Coverage and Method-Test Mapping
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Agent
+        run: mvn clean install -pl agent -am
+
+      - name: Run Tests with Agent
+        run: |
+          mvn test -pl app
+
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: app/target/site/jacoco
+
+      - name: Upload Method-Test Mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: method-test-mapping
+          path: method_test_mapping.json
