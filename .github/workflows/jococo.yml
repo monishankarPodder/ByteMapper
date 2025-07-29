@@ -31,6 +31,9 @@ jobs:
           name: jacoco-report
           path: app/target/site/jacoco
 
+      - name: Debug - List app/target
+        run: ls -l app/target
+
       - name: Upload Method-Test Mapping
         uses: actions/upload-artifact@v4
         with:
