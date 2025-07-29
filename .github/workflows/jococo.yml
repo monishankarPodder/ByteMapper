@@ -1,4 +1,4 @@
-name: JaCoCo Coverage and Method-Test Mapping
+name: JaCoCo Coverage and Method-Test Mappings
 
 on:
   push:
