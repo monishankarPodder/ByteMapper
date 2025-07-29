@@ -1,14 +1,13 @@
 package com.example;
 
-import org.junit.Before;
+import com.example.coverage.TestListener;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class MyServiceTest {
 
-    @Before
-    public void setUp() {
-        AgentMain.currentTest.set(Thread.currentThread().getStackTrace()[2].getMethodName());
-    }
+    @Rule
+    public TestListener watcher = new TestListener();
 
     @Test
     public void testAddUser() {
