@@ -4,8 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.jupiter.api.Test;
-
 import net.bytebuddy.asm.Advice;
 
 public class TrackerAdvice {
@@ -21,6 +19,23 @@ public class TrackerAdvice {
     }
 
     @Advice.OnMethodEnter
-    public static void captureTest(@Advice.Origin Class<?> clazz) {
-        if (clazz.getAnnotation(Test.class) != null) {
-            currentTest.set
+    public static void captureTest(@Advice.Origin("#t#.#m") String methodName) {
+        if (methodName.contains("Test")) {
+            currentTest.set(methodName);
+        }
+    }
+
+    @Advice.OnMethodExit(onThrowable = Throwable.class)
+    public static void onExit() {
+        try (FileWriter fw = new FileWriter("method_test_mapping.json")) {
+            fw.write("{\n");
+            int i = 0;
+            for (var entry : methodToTest.entrySet()) {
+                fw.write("  \"" + entry.getKey() + "\": \"" + entry.getValue() + "\"");
+                if (++i < methodToTest.size()) fw.write(",");
+                fw.write("\n");
+            }
+            fw.write("}\n");
+        } catch (IOException ignored) {}
+    }
+}
