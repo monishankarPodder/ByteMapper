@@ -40,6 +40,12 @@ jobs:
           name: jacoco-report
           path: app/target/site/jacoco
 
+      - name: Check if mapping file exists
+        run: |
+          echo "Looking for method_test_mapping.json..."
+          find . -name method_test_mapping.json || echo "Not found"
+
+
       - name: Upload Method-Test Mapping
         uses: actions/upload-artifact@v4
         with:
