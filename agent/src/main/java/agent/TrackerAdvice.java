@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TrackerAdvice {
-
     private static final ConcurrentHashMap<String, String> methodToTest = new ConcurrentHashMap<>();
     private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
 
     static {
-        // Register shutdown hook to dump the method-to-test mapping once JVM shuts down
+        // Shutdown hook to write method-test mapping at JVM exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try (FileWriter fw = new FileWriter("method_test_mapping.json")) {
+            String filePath = System.getProperty("user.dir") + "/method_test_mapping.json";
+            try (FileWriter fw = new FileWriter(filePath)) {
                 fw.write("{\n");
                 int i = 0;
                 for (Map.Entry<String, String> entry : methodToTest.entrySet()) {
@@ -24,13 +24,15 @@ public class TrackerAdvice {
                     fw.write("\n");
                 }
                 fw.write("}\n");
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }));
     }
 
     @Advice.OnMethodEnter
     public static void onEnter(@Advice.Origin("#t#.#m") String methodName) {
-        if (isTestMethod(methodName)) {
+        if (methodName.contains("Test")) {
             currentTest.set(methodName);
         } else {
             String test = currentTest.get();
@@ -38,9 +40,5 @@ public class TrackerAdvice {
                 methodToTest.putIfAbsent(methodName, test);
             }
         }
-    }
-
-    private static boolean isTestMethod(String methodName) {
-        return methodName.contains("Test"); // You can refine this based on your test naming
     }
 }
