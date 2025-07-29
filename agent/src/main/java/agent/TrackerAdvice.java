@@ -1,5 +1,6 @@
 package agent;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
@@ -12,11 +13,14 @@ public class TrackerAdvice {
     private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
 
     static {
-        // Write file only once when JVM shuts down (i.e. after all tests finish)
+        // JVM shutdown: write only once after all tests complete
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            String filePath = "app/target/method_test_mapping.json";
             try {
-                String filePath = "app/target/method_test_mapping.json";
-                try (FileWriter fw = new FileWriter(filePath)) {
+                File file = new File(filePath);
+                file.getParentFile().mkdirs(); // ensure app/target exists
+
+                try (FileWriter fw = new FileWriter(file)) {
                     fw.write("{\n");
                     int i = 0;
                     for (Map.Entry<String, String> entry : methodToTest.entrySet()) {
@@ -26,9 +30,9 @@ public class TrackerAdvice {
                     }
                     fw.write("}\n");
                 }
-                System.out.println("✅ Method-Test mapping written to: " + filePath);
+                System.out.println("✅ method_test_mapping.json created at: " + file.getAbsolutePath());
             } catch (IOException e) {
-                System.err.println("❌ Failed to write method_test_mapping.json: " + e.getMessage());
+                System.err.println("❌ Error writing method_test_mapping.json: " + e.getMessage());
             }
         }));
     }
