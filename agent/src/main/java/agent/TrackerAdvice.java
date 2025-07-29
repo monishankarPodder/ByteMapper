@@ -2,6 +2,7 @@ package agent;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.bytebuddy.asm.Advice;
@@ -30,7 +31,7 @@ public class TrackerAdvice {
         try (FileWriter fw = new FileWriter("method_test_mapping.json")) {
             fw.write("{\n");
             int i = 0;
-            for (var entry : methodToTest.entrySet()) {
+            for (Map.Entry<String, String> entry : methodToTest.entrySet()) {
                 fw.write("  \"" + entry.getKey() + "\": \"" + entry.getValue() + "\"");
                 if (++i < methodToTest.size()) fw.write(",");
                 fw.write("\n");
